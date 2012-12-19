@@ -129,8 +129,28 @@ public class NBayes {
 			else
 				neg++;
 		}
-		System.out.println("p: " + pos + " n: " + neg);
 		return pos * 1.0 / (pos + neg);
+	}
+	
+	public void printConfusionMatrix() {
+		HashMap<String, HashMap<String, Integer>> m = new HashMap<String, HashMap<String, Integer>>();
+		for(String l1 : class_counts.keySet()) {
+			m.put(l1, new HashMap<String, Integer>());
+			for(String l2 : class_counts.keySet()) {
+				m.get(l1).put(l2, 0);
+			}
+		}
+		for(String[] d : data[1]) {
+			m.get(classify(d)).put(d[d.length -1], m.get(classify(d)).get(d[d.length -1])+1);
+		}
+		
+		for(String l1 : class_counts.keySet()) {
+			System.out.print(l1 + "\t");
+			for(String l2 : class_counts.keySet()) {
+				System.out.print(m.get(l1).get(l2) + "\t");
+			}
+			System.out.println();
+		}
 	}
 
 	public static void main(String[] args) {
@@ -144,6 +164,8 @@ public class NBayes {
 		}
 		System.out.println(sum/num);
 		// ~84.9%
+		NBayes nb = new NBayes(jfc.getSelectedFile());
+		nb.printConfusionMatrix();
 	}
 
 }
