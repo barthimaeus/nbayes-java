@@ -49,7 +49,7 @@ public class NBayes {
 
 		for (String label : class_counts.keySet()) {
 			class_probs.put(label, class_counts.get(label)
-					/ (double) data.length);
+					/ (double) data[0].length);
 			classified_attribute_probs
 					.put(label, new HashMap<String, Double>());
 			double sum = 0;
@@ -68,9 +68,13 @@ public class NBayes {
 		ArrayList<String[]> data_list = new ArrayList<String[]>();
 		try {
 			RandomAccessFile f = new RandomAccessFile(file, "r");
-			String instane = null;
-			while ((instane = f.readLine()) != null) {
-				data_list.add(instane.split(","));
+			String text = null;
+			while ((text = f.readLine()) != null) {
+				String[] instance = text.split(",");
+				for(int i = 0; i<instance.length; i++) {
+					instance[i] = "" + i + instance[i];
+				}
+				data_list.add(instance);
 			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -94,7 +98,6 @@ public class NBayes {
 				k++;
 			}
 		}
-		System.out.println(j);
 		return data;
 	}
 
@@ -103,11 +106,13 @@ public class NBayes {
 		for (String label : class_counts.keySet()) {
 			double prob = class_probs.get(label);
 			for (String attr : instance) {
-				Double p = classified_attribute_probs.get(label).get(attr);
-				if (p == null) {
-					p = 0.0;
+				if(!attr.startsWith("6")) {
+					Double p = classified_attribute_probs.get(label).get(attr);
+					if (p == null) {
+						p = 0.0;
+					}
+					prob *= p;
 				}
-				prob *= p;
 			}
 			probs.put(prob, label);
 		}
@@ -131,8 +136,14 @@ public class NBayes {
 	public static void main(String[] args) {
 		JFileChooser jfc = new JFileChooser();
 		jfc.showOpenDialog(null);
-		NBayes nb = new NBayes(jfc.getSelectedFile());
-		System.out.println(nb.crossvalidate());
+		double sum = 0;
+		int num = 100;
+		for(int i = 0; i<num; i++) {
+			NBayes nb = new NBayes(jfc.getSelectedFile());
+			sum += nb.crossvalidate();
+		}
+		System.out.println(sum/num);
+		// ~84.9%
 	}
 
 }
